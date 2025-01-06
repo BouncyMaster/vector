@@ -3,6 +3,12 @@ use std::ops::{Add, AddAssign, Mul, MulAssign};
 #[derive(Debug, Clone, Copy)]
 pub struct Vector<const N: usize>([f32; N]);
 
+impl<const N: usize> Vector<N> {
+    pub fn new() -> Vector<N> {
+        Vector([0.0; N])
+    }
+}
+
 impl<const N: usize> Add<Vector<N>> for Vector<N> {
     type Output = Self;
 
@@ -58,18 +64,12 @@ impl<const N: usize> MulAssign<f32> for Vector<N> {
     }
 }
 
-/*
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    #[buil]
-    fn diff_size() {
-        let v1 = Vector([1f32, 2f32]);
-        let v2 = Vector([3f32, 4f32, 5f32]);
-
-        let _ = v1 + v2;
+    fn new() {
+        let _ = Vector::<4>::new();
     }
 }
-*/
