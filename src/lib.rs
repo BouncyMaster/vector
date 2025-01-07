@@ -1,7 +1,7 @@
 use std::ops::{Add, AddAssign, Mul, MulAssign};
 
 #[derive(Debug, Clone, Copy)]
-pub struct Vector<const N: usize>([f32; N]);
+pub struct Vector<const N: usize>(pub [f32; N]);
 
 impl<const N: usize> Vector<N> {
     pub fn new() -> Vector<N> {
