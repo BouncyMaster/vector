@@ -1,115 +1,122 @@
 use std::ops::{Add, AddAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
+use num::{Signed, NumCast};
+
+pub trait SignedUnified: Signed + Copy + NumCast {}
+impl<T> SignedUnified for T where T: Signed + Copy + NumCast {}
+
 #[derive(Debug, Clone, Copy)]
-pub struct Vector<const N: usize>(pub [f32; N]);
+pub struct Vector<const N: usize, T: SignedUnified>(pub [T; N]);
 
-impl<const N: usize> Vector<N> {
-    pub fn new() -> Vector<N> {
-        Vector([0.0; N])
+impl<const N: usize, T: SignedUnified> Vector<N, T> {
+    pub fn new() -> Vector<N, T> {
+        Vector([num::zero(); N])
     }
 }
 
-impl<const N: usize> Add<Vector<N>> for Vector<N> {
+impl<const N: usize, T: SignedUnified> Default for Vector<N, T> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl<const N: usize, T: SignedUnified, U: SignedUnified> Add<Vector<N, U>> for Vector<N, T> {
     type Output = Self;
 
-    fn add(self, rhs: Vector<N>) -> Self::Output {
-        let result = std::array::from_fn(|i| self.0[i] + rhs.0[i]);
+    fn add(self, rhs: Vector<N, U>) -> Self::Output {
+        let result = std::array::from_fn(|i| self.0[i] + NumCast::from(rhs.0[i]).unwrap());
         Vector(result)
     }
 }
 
-impl<const N: usize> Add<f32> for Vector<N> {
+impl<const N: usize, T: SignedUnified, U: SignedUnified> Add<U> for Vector<N, T> {
     type Output = Self;
 
     /// Implement scalar addition
-    fn add(self, rhs: f32) -> Self::Output {
-        let result = std::array::from_fn(|i| self.0[i] + rhs);
+    fn add(self, rhs: U) -> Self::Output {
+        let cast = NumCast::from(rhs).unwrap();
+        let result = std::array::from_fn(|i| self.0[i] + cast);
         Vector(result)
     }
 }
 
-impl<const N: usize> Add<Vector<N>> for f32 {
-    type Output = Vector<N>;
-
-    /// Implement scalar addition
-    fn add(self, rhs: Vector<N>) -> Self::Output {
-        let result = std::array::from_fn(|i| self + rhs.0[i]);
-        Vector(result)
-    }
-}
-
-impl<const N: usize> AddAssign<Vector<N>> for Vector<N> {
-    fn add_assign(&mut self, rhs: Vector<N>) {
+impl<const N: usize, T: SignedUnified, U: SignedUnified> AddAssign<Vector<N, U>> for Vector<N, T> {
+    fn add_assign(&mut self, rhs: Vector<N, U>) {
         for i in 0..N {
-            self.0[i] += rhs.0[i];
+            self.0[i] = self.0[i] + NumCast::from(rhs.0[i]).unwrap();
         }
     }
 }
 
-impl<const N: usize> AddAssign<f32> for Vector<N> {
+impl<const N: usize, T: SignedUnified, U: SignedUnified> AddAssign<U> for Vector<N, T> {
     /// Implement scalar addition
-    fn add_assign(&mut self, rhs: f32) {
+    fn add_assign(&mut self, rhs: U) {
+        let cast = NumCast::from(rhs).unwrap();
         for i in 0..N {
-            self.0[i] += rhs;
+            self.0[i] = self.0[i] + cast;
         }
     }
 }
 
-impl<const N: usize> Sub<Vector<N>> for Vector<N> {
+impl<const N: usize, T: SignedUnified, U: SignedUnified> Sub<Vector<N, U>> for Vector<N, T> {
     type Output = Self;
 
-    fn sub(self, rhs: Vector<N>) -> Self::Output {
-        let result = std::array::from_fn(|i| self.0[i] - rhs.0[i]);
+    fn sub(self, rhs: Vector<N, U>) -> Self::Output {
+        let result = std::array::from_fn(|i| self.0[i] - NumCast::from(rhs.0[i]).unwrap());
         Vector(result)
     }
 }
 
-impl<const N: usize> Sub<f32> for Vector<N> {
+impl<const N: usize, T: SignedUnified, U: SignedUnified> Sub<U> for Vector<N, T> {
     type Output = Self;
 
-    fn sub(self, rhs: f32) -> Self::Output {
-        let result = std::array::from_fn(|i| self.0[i] - rhs);
+    fn sub(self, rhs: U) -> Self::Output {
+        let cast = NumCast::from(rhs).unwrap();
+        let result = std::array::from_fn(|i| self.0[i] - cast);
         Vector(result)
     }
 }
 
-impl<const N: usize> SubAssign<Vector<N>> for Vector<N> {
-    fn sub_assign(&mut self, rhs: Vector<N>) {
+impl<const N: usize, T: SignedUnified, U: SignedUnified> SubAssign<Vector<N, U>> for Vector<N, T> {
+    fn sub_assign(&mut self, rhs: Vector<N, U>) {
         for i in 0..N {
-            self.0[i] -= rhs.0[i];
+            self.0[i] = self.0[i] - NumCast::from(rhs.0[i]).unwrap();
         }
     }
 }
 
-impl<const N: usize> SubAssign<f32> for Vector<N> {
+impl<const N: usize, T: SignedUnified, U: SignedUnified> SubAssign<U> for Vector<N, T> {
     /// Implement scalar addition
-    fn sub_assign(&mut self, rhs: f32) {
+    fn sub_assign(&mut self, rhs: U) {
+        let cast = NumCast::from(rhs).unwrap();
         for i in 0..N {
-            self.0[i] -= rhs;
+            self.0[i] = self.0[i] - cast;
         }
     }
 }
 
-impl<const N: usize> Mul<f32> for Vector<N> {
+impl<const N: usize, T: SignedUnified, U: SignedUnified> Mul<U> for Vector<N, T> {
     type Output = Self;
 
     /// Implement scalar multiplication
-    fn mul(self, rhs: f32) -> Self::Output {
-        let result = std::array::from_fn(|i| self.0[i] * rhs);
+    fn mul(self, rhs: U) -> Self::Output {
+        let cast = NumCast::from(rhs).unwrap();
+        let result = std::array::from_fn(|i| self.0[i] * cast);
         Vector(result)
     }
 }
 
-impl<const N: usize> MulAssign<f32> for Vector<N> {
+impl<const N: usize, T: SignedUnified, U: SignedUnified> MulAssign<U> for Vector<N, T> {
     /// Implement scalar multiplication
-    fn mul_assign(&mut self, rhs: f32) {
+    fn mul_assign(&mut self, rhs: U) {
+        let cast = NumCast::from(rhs).unwrap();
         for i in 0..N {
-            self.0[i] *= rhs;
+            self.0[i] = self.0[i] * cast;
         }
     }
 }
 
-impl<const N: usize> Neg for Vector<N> {
+impl<const N: usize, T: SignedUnified> Neg for Vector<N, T> {
     type Output = Self;
 
     fn neg(self) -> Self::Output {
