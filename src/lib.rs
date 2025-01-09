@@ -5,7 +5,7 @@ use num::{Signed, NumCast};
 pub trait SignedUnified: Signed + Copy + NumCast {}
 impl<T> SignedUnified for T where T: Signed + Copy + NumCast {}
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Vector<const N: usize, T: SignedUnified>(pub [T; N]);
 
 impl<const N: usize, T: SignedUnified> Vector<N, T> {
@@ -130,30 +130,88 @@ mod tests {
     use super::*;
 
     #[test]
-    fn new() {
-        let _ = Vector::<4>::new();
-    }
-
-    #[test]
     fn add_vec() {
-        let a = Vector([1.0, 0.0]);
-        let b = Vector([4.0, 2.0]);
+        let a = Vector([1, 0]);
+        let b = Vector([4, 2]);
 
-        let _ = a + b;
+        assert_eq!(a + b, Vector([5, 2]))
     }
 
     #[test]
     fn sub_vec() {
-        let a = Vector([1.0, 0.0]);
-        let b = Vector([4.0, 2.0]);
+        let a = Vector([1, 0]);
+        let b = Vector([4, 2]);
 
-        let _ = a - b;
+        assert_eq!(a - b, Vector([-3, -2]))
     }
 
     #[test]
     fn neg() {
-        let a = Vector([1.0, 0.0]);
+        let a = Vector([1, 0]);
 
-        let _ = -a;
+        assert_eq!(-a, Vector([-1, 0]))
+    }
+
+    #[test]
+    fn mul_scalar() {
+        let a = Vector([1, 0]);
+
+        assert_eq!(a * 4, Vector([4, 0]))
+    }
+
+    #[test]
+    fn add_assign_vec() {
+        let mut a = Vector([1, 0]);
+        let b = Vector([4, 2]);
+
+        a += b;
+
+        assert_eq!(a, Vector([5, 2]))
+    }
+
+    #[test]
+    fn add_assign_scalar() {
+        let mut a = Vector([1, 0]);
+        let b = 5;
+
+        a += b;
+
+        assert_eq!(a, Vector([6, 5]))
+    }
+
+    #[test]
+    fn sub_assign_vec() {
+        let mut a = Vector([1, 0]);
+        let b = Vector([4, 0]);
+
+        a -= b;
+
+        assert_eq!(a, Vector([-3, 0]))
+    }
+
+    #[test]
+    fn sub_assign_scalar() {
+        let mut a = Vector([1, 0]);
+        let b = -5;
+
+        a -= b;
+
+        assert_eq!(a, Vector([6, 5]))
+    }
+
+    #[test]
+    fn vec_cast() {
+        let a = Vector([1, 0]);
+        let b = Vector([4.0, 2.3]);
+
+        assert_eq!(a + b, Vector([5, 2]))
+    }
+
+    #[test]
+    fn scalar_cast() {
+        let a = Vector([1, 0]);
+        let b = 1.6;
+
+        assert_eq!(a + b, Vector([2, 1]))
     }
 }
